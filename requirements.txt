@@ -1,8 +1,5 @@
-Flask==2.3.2
-line-bot-sdk==2.3.1
-numpy==1.24.3
-pandas==2.0.3
-matplotlib==3.7.1
-pyimgur==0.2.2
+pip==24.1.1
+flask
+line-bot-sdk==1.19.0
+gunicorn
 schedule==1.1.0
-gunicorn==20.1.0
