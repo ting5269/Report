@@ -43,7 +43,7 @@ def callback():
 def send_scheduled_message():
     try:
         message = TextSendMessage(text="這是一條定時訊息")
-        with open("C:/Users/user/Downloads/SSUPERWATCH/user_ids.txt", "r") as file:
+        with open("./user_ids.txt", "r") as file:
             user_ids = set(file.read().splitlines())  # 讀取資料
         for user_id in user_ids:
             line_bot_api.push_message(user_id, message)
