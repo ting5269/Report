@@ -59,7 +59,7 @@ def handle_message(event):
     user_input = event.message.text
     user_id = event.source.user_id  # 獲取用戶的User ID
     print(f"User ID: {user_id}")  # print User ID 到控制台
-    matplotlib.rc('font', family='Microsoft JhengHei')
+    matplotlib.rc('font', family='SimHei')
 
     # 將User ID儲存到文件中
     with open("./user_ids.txt", "a") as file:
@@ -164,7 +164,7 @@ def handle_message(event):
         StandUpAlert = df2_yesterday['StandUpAlert']
 
         df_hourly = df_yesterday.resample('h').sum()
-        matplotlib.rc('font', family='Microsoft JhengHei')
+        
         plt.figure(figsize=(10, 6))
         bars = plt.bar(df_hourly.index, df_hourly['Step'], width=0.03, align='center')
 
