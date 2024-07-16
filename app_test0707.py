@@ -18,6 +18,8 @@ import pyimgur
 import time
 import schedule 
 
+from linebot.models import TextSendMessage
+
 CLIENT_ID = "122aba7e3e3f13a"
 PATH = 'report2.png'
 
