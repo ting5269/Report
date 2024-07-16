@@ -150,26 +150,54 @@ def handle_message(event):
         line_bot_api.reply_message(event.reply_token, msg3)
     elif event.message.text == '日報表睡眠':
         {}
-    elif event.message.text =='今日成就':
-        data = pd.read_csv('./dailyActivity.csv')
-        df = pd.DataFrame(data)
-        df['ActivityDate'] = pd.to_datetime(df['ActivityDate'])
-        df.set_index('ActivityDate', inplace = True)
-        specific_date = '2024-05-27'
-        df_specific_date = df.loc[specific_date]
-        total_steps = df_specific_date['Step'].sum()
-
-        # 判斷總步數是否超過10
-        if total_steps > 10:
-            reply_text = f'今日步數：{total_steps} 達標！你好棒！'
-        else:
-            reply_text = f'今日步數：{total_steps} 未達標，加油哦！'
-        
-        # 回覆消息
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=reply_text)
-        )
+    elif event.message.text == '今日成就':
+        try:
+            # 讀取CSV文件
+            data = pd.read_csv('./dailyActivity.csv')
+            df = pd.DataFrame(data)
+            
+            # 將ActivityDate轉換為日期時間格式並設置為索引
+            df['ActivityDate'] = pd.to_datetime(df['ActivityDate'])
+            df.set_index('ActivityDate', inplace=True)
+            
+            # 選擇特定日期的數據
+            specific_date = '2024-05-27'
+            df_specific_date = df.loc[specific_date]
+            
+            # 計算當日總步數
+            total_steps = df_specific_date['Step'].sum()
+            
+            # 判斷總步數是否超過10
+            if total_steps > 10:
+                reply_text = f'今日步數：{total_steps} 達標！你好棒！'
+                image_url = 'https://i.imgur.com/4QfKuz1.png'
+                
+                # 發送文字消息
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    [
+                        TextSendMessage(text=reply_text),
+                        ImageSendMessage(
+                            original_content_url=image_url,
+                            preview_image_url=image_url
+                        )
+                    ]
+                )
+            else:
+                reply_text = f'今日步數：{total_steps} 未達標，加油哦！'
+                
+                # 發送文字消息
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text=reply_text)
+                )
+        except Exception as e:
+            # 處理可能發生的錯誤
+            error_message = f'處理數據時發生錯誤：{str(e)}'
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text=error_message)
+            )
     
     elif event.message.text == '日報表活動':
         data = pd.read_csv('./dailyActivity.csv')
