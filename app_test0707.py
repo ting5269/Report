@@ -151,7 +151,7 @@ def handle_message(event):
     elif event.message.text == '日報表睡眠':
         {}
     elif event.message.text =='今日成就':
-        data = pd.read_csv('C:/Users/user/Downloads/SSUPERWATCH/dailyActivity.csv')
+        data = pd.read_csv('./dailyActivity.csv')
         df = pd.DataFrame(data)
         df['ActivityDate'] = pd.to_datetime(df['ActivityDate'])
         df.set_index('ActivityDate', inplace = True)
