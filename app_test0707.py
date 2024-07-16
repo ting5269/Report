@@ -76,6 +76,21 @@ def handle_message(event):
             event.reply_token,
             TextSendMessage(text=reply_text)
         )
+    elif event.message.text == '榮譽勳章': #快速選單內容
+        message = TextSendMessage(
+        text='請選擇一個選項',
+        quick_reply=QuickReply(
+           items=[
+                QuickReplyButton(
+                    action=MessageAction(label="今日成就", text="今日成就")
+                ),
+                QuickReplyButton(
+                    action=MessageAction(label="目前進度", text="目前進度")
+                ),
+            ]
+        )
+        )
+        line_bot_api.reply_message(event.reply_token, message)
     elif event.message.text == '日報表顯示':  # 快速選單內容
         message = TextSendMessage(
             text='請選擇一個選項',
