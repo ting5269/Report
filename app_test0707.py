@@ -282,7 +282,7 @@ def handle_message(event):
     elif event.message.text == '目前進度':
         try:
             # 讀取CSV文件
-            data = pd.read_csv('C:/Users/user/Downloads/SSUPERWATCH/dailyActivity.csv')
+            data = pd.read_csv('./dailyActivity.csv')
             df = pd.DataFrame(data)
             
             # 將ActivityDate轉換為日期時間格式並設置為索引
