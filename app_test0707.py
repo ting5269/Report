@@ -27,8 +27,8 @@ PATH = 'report2.png'
 
 app = Flask(__name__)
 
-line_bot_api = LineBotApi("A8ISwhsCwJuQrPe03vd+6xngj59R4nah0V4If0GKJjiSg4EIogYRCWzwE+0XA4Avkc2mBfZHLHCSQxWhkgmuykstCywsHIBXr1jn08CwQutNBrcrg5gzgIQIMDFF/LiYErXmttwdoHlegvBCRgRuYgdB04t89/1O/w1cDnyilFU=")
-handler = WebhookHandler("d969ac6229fcb01a73b29792667ec7b1")
+line_bot_api = LineBotApi("hQJcvO4Qf+QCC1DmH8LHbrKdmrd149Ry1v1xJ69jkf+O3+U6KHDVR3g6bjkGOLuURZkLXZoRojA+wtuEVNM841yVzpNVZfwrOufakv10iBSgzRiL8ZHllBQkNICYd6HumClRBbR/sG10oreTRLVERgdB04t89/1O/w1cDnyilFU=")
+handler = WebhookHandler("93e61e04ad5a8cac33ef67eac0f8e4e5")
 
 # 用於存儲每個用戶的累積步數
 user_steps = {}
