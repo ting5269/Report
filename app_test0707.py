@@ -341,7 +341,7 @@ def handle_message(event):
         specific_time = '2024-05-27'
         df_yesterday = df.loc[specific_time]
 
-        datawarning = pd.read_csv(./warning.csv')
+        datawarning = pd.read_csv('./warning.csv')
         df2 = pd.DataFrame(datawarning)
         df2['ActivityDate'] = pd.to_datetime(df2['ActivityDate'])
         df2.set_index('ActivityDate', inplace=True)
