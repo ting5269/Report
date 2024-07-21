@@ -20,14 +20,24 @@ import schedule
 
 from linebot.models import TextSendMessage
 
+
+
 CLIENT_ID = "122aba7e3e3f13a"
 PATH = 'report2.png'
 
 app = Flask(__name__)
 
-line_bot_api = LineBotApi("hQJcvO4Qf+QCC1DmH8LHbrKdmrd149Ry1v1xJ69jkf+O3+U6KHDVR3g6bjkGOLuURZkLXZoRojA+wtuEVNM841yVzpNVZfwrOufakv10iBSgzRiL8ZHllBQkNICYd6HumClRBbR/sG10oreTRLVERgdB04t89/1O/w1cDnyilFU=")
-handler = WebhookHandler("93e61e04ad5a8cac33ef67eac0f8e4e5")
+line_bot_api = LineBotApi("A8ISwhsCwJuQrPe03vd+6xngj59R4nah0V4If0GKJjiSg4EIogYRCWzwE+0XA4Avkc2mBfZHLHCSQxWhkgmuykstCywsHIBXr1jn08CwQutNBrcrg5gzgIQIMDFF/LiYErXmttwdoHlegvBCRgRuYgdB04t89/1O/w1cDnyilFU=")
+handler = WebhookHandler("d969ac6229fcb01a73b29792667ec7b1")
 
+# 用於存儲每個用戶的累積步數
+user_steps = {}
+# 勳章目標
+milestones = [8000]
+# 勳章圖片 URL
+milestone_images = {
+    8000: "https://i.imgur.com/4QfKuz1.png"
+}
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -59,6 +69,9 @@ def schedule_jobs():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+
+    global current_date, total_steps, days_counted
+
     user_input = event.message.text
     user_id = event.source.user_id  # 獲取用戶的User ID
     print(f"User ID: {user_id}")  # print User ID 到控制台
@@ -78,7 +91,52 @@ def handle_message(event):
             TextSendMessage(text=reply_text)
         )
 
-    
+    elif user_input == "+1":
+        # 獲取當前用戶的累積步數，如果沒有則初始化為0
+        steps = user_steps.get(user_id, 0) + 1000
+        user_steps[user_id] = steps
+        
+        # 計算距離目標步數的差距
+        target_steps = 8000
+        remaining_steps = max(target_steps - steps, 0)
+        
+        # 設定回覆消息
+        if steps >= target_steps:
+            reply_text = "恭喜達成目標！"
+            # 發送對應勳章圖片
+            image_url = milestone_images.get(target_steps, "")
+            messages = [TextSendMessage(text=reply_text)]
+            if image_url:
+                messages.append(ImageSendMessage(
+                    original_content_url=image_url,
+                    preview_image_url=image_url
+                ))
+        else:
+            reply_text = f"目前步數: {steps} 步，距離目標 {target_steps} 步還有 {remaining_steps} 步。"
+            messages = [TextSendMessage(text=reply_text)]
+
+        line_bot_api.reply_message(
+            event.reply_token,
+            messages
+        )
+    elif user_input == "目前累積":
+        # 獲取當前用戶的累積步數，如果沒有則初始化為0
+        steps = user_steps.get(user_id, 0)
+        remaining_steps = max(8000 - steps, 0)
+        reply_text = f"目前累積步數: {steps} 步，距離 8000 步還有 {remaining_steps} 步。"
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=reply_text)
+        )
+    elif user_input == "重新計算":
+        # 重置當前用戶的累積步數為0
+        user_steps[user_id] = 0
+        reply_text = "累積步數已歸零。"
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=reply_text)
+        )
+
     elif event.message.text == '榮譽勳章': #快速選單內容
         message = TextSendMessage(
         text='請選擇一個選項',
@@ -89,6 +147,15 @@ def handle_message(event):
                 ),
                 QuickReplyButton(
                     action=MessageAction(label="目前進度", text="目前進度")
+                ),
+                QuickReplyButton(
+                    action=MessageAction(label="+1天", text="+1")
+                ),
+                QuickReplyButton(
+                    action=MessageAction(label="目前累積", text="目前累積")
+                ),
+                QuickReplyButton(
+                    action=MessageAction(label="重新計算", text="重新計算")
                 ),
             ]
         )
@@ -168,6 +235,10 @@ def handle_message(event):
         line_bot_api.reply_message(event.reply_token, msg3)
     elif event.message.text == '日報表睡眠':
         {}
+
+    
+    
+
     elif event.message.text == '今日成就':
         try:
             # 讀取CSV文件
@@ -218,6 +289,49 @@ def handle_message(event):
             )
 
     
+
+    elif event.message.text == '目前進度':
+        try:
+            # 讀取CSV文件
+            data = pd.read_csv('./dailyActivity.csv')
+            df = pd.DataFrame(data)
+            
+            # 將ActivityDate轉換為日期時間格式並設置為索引
+            df['ActivityDate'] = pd.to_datetime(df['ActivityDate'])
+            df.set_index('ActivityDate', inplace=True)
+            
+            # 獲取當月的第一天和今天的日期
+            today = datetime.today()
+            start_date = today.replace(day=1).strftime('%Y-%m-%d')
+            end_date = today.strftime('%Y-%m-%d')
+            
+            # 選擇日期範圍內的數據
+            mask = (df.index >= start_date) & (df.index <= end_date)
+            df_date_range = df.loc[mask]
+            
+            # 確認Step列存在
+            if 'Step' not in df.columns:
+                raise ValueError('Step列不存在於CSV文件中')
+            
+            # 計算日期範圍內的總步數
+            total_steps = df_date_range['Step'].sum()
+            
+            # 發送進度消息
+            reply_text = f'從 {start_date} 到 {end_date}，你的總步數是：{total_steps} 步。'
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text=reply_text)
+            )
+        
+        except Exception as e:
+            # 處理其他可能發生的錯誤
+            error_message = f'處理數據時發生錯誤：{str(e)}'
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text=error_message)
+            )
+
+
     
     elif event.message.text == '日報表活動':
         data = pd.read_csv('./dailyActivity.csv')
@@ -227,7 +341,7 @@ def handle_message(event):
         specific_time = '2024-05-27'
         df_yesterday = df.loc[specific_time]
 
-        datawarning = pd.read_csv('./warning.csv')
+        datawarning = pd.read_csv(./warning.csv')
         df2 = pd.DataFrame(datawarning)
         df2['ActivityDate'] = pd.to_datetime(df2['ActivityDate'])
         df2.set_index('ActivityDate', inplace=True)
